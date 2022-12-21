@@ -12,4 +12,10 @@ A portwork project
     When you upload your public key to the identity control plane, you get a key ID in return:
     The key format is tenantId/userId/fingerprint.
     Or we can generate again: 
-- 3.2
+
+
+# Create eks cluster in aws
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+
+or aws configure
