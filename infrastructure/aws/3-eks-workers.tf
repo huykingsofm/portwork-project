@@ -3,11 +3,12 @@ resource "aws_eks_node_group" "portwork-workers" {
   node_group_name = "portwork-workers"
   node_role_arn   = aws_iam_role.worker_role.arn
   subnet_ids      = module.vpc.private_subnets
+  disk_size = "50"
 
   scaling_config {
-    desired_size = 1
-    max_size     = 2
-    min_size     = 1
+    desired_size = 3
+    max_size     = 3
+    min_size     = 3
   }
 
   update_config {
