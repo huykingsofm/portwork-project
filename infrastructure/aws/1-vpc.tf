@@ -1,117 +1,34 @@
-resource "aws_vpc" "sandbox" {
-  cidr_block           = var.cidr_block
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "3.18.1"
+
+  name = "education-vpc"
+
+  cidr = "10.1.0.0/16"
+  azs  = slice(data.aws_availability_zones.azs.names, 0, 3)
+
+  private_subnets = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
+  public_subnets  = ["10.1.4.0/24", "10.1.5.0/24", "10.1.6.0/24"]
+
+  enable_nat_gateway   = true
+  single_nat_gateway   = true
   enable_dns_hostnames = true
 
-  tags = {
-    Name   = var.vpc_name
-    Author = var.author
+  public_subnet_tags = {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                      = 1
   }
-}
 
-// 2 Public Subnets
-resource "aws_subnet" "public_subnets" {
-  vpc_id                  = aws_vpc.sandbox.id
-  cidr_block              = "10.1.${count.index * 2 + 1}.0/24"
-  availability_zone       = element(var.availability_zones, count.index)
-  map_public_ip_on_launch = true
-
-  count = var.public_subnets_count
-
-  tags = {
-    Name   = "public_10.1.${count.index * 2 + 1}.0_${element(var.availability_zones, count.index)}"
-    Author = var.author
+  private_subnet_tags = {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
+    "kubernetes.io/role/internal-elb"             = 1
   }
 }
 
-// 2 Private Subnets
-resource "aws_subnet" "private_subnets" {
-  count = var.private_subnets_count
-  vpc_id                  = aws_vpc.sandbox.id
-  cidr_block              = "10.1.${count.index * 2}.0/24"
-  availability_zone       = element(var.availability_zones, count.index)
-  map_public_ip_on_launch = false
-
-
-  tags = {
-    Name   = "private_10.1.${count.index * 2}.0_${element(var.availability_zones, count.index)}"
-    Author = var.author
-    "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-  }
+data "aws_availability_zones" "azs" {
+  all_availability_zones = true
 }
 
-// Static IP for Nat Gateway
-resource "aws_eip" "nat" {
-  vpc = true
 
-  tags = {
-    Name   = "eip-nat_${var.vpc_name}"
-    Author = var.author
-  }
-}
-
-// Nat Gateway
-resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = element(aws_subnet.public_subnets.*.id, 0)
-
-  tags = {
-    Name   = "nat_${var.vpc_name}"
-    Author = var.author
-  }
-}
-
-// Private Route Table
-resource "aws_route_table" "private_rt" {
-  vpc_id = aws_vpc.sandbox.id
-
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat.id
-  }
-
-  tags = {
-    Name   = "private_rt_${var.vpc_name}"
-    Author = var.author
-  }
-}
-
-// Associate private subnets to private route table
-resource "aws_route_table_association" "private" {
-  count          = var.private_subnets_count
-  subnet_id      = element(aws_subnet.private_subnets.*.id, count.index)
-  route_table_id = aws_route_table.private_rt.id
-}
-
-// Internet Gateway
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.sandbox.id
-
-  tags = {
-    Name   = "igw_${var.vpc_name}"
-    Author = var.author
-  }
-}
-
-// Public Route Table
-resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.sandbox.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name   = "public_rt_${var.vpc_name}"
-    Author = var.author
-  }
-}
-
-// Associate public subnets to public route table
-resource "aws_route_table_association" "public" {
-  count          = var.public_subnets_count
-  subnet_id      = element(aws_subnet.public_subnets.*.id, count.index)
-  route_table_id = aws_route_table.public_rt.id
-}
+#Value (us-west-2-las-1a) for parameter availabilityZone is invalid.
+#Subnets can currently only be created in the following availability zones: us-west-2a, us-west-2b, us-west-2c, us-west-2d.
