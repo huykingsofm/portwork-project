@@ -16,7 +16,9 @@ resource "aws_eks_node_group" "portwork-workers" {
   update_config {
     max_unavailable = 1
   }
-
+  # remote_access {
+  #   source_security_group_ids = [aws_security_group.worker-sg.id]
+  # }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
@@ -87,6 +89,7 @@ resource "aws_launch_template" "worker-launch-template" {
       delete_on_termination = true
     }
   }
+  vpc_security_group_ids   = [aws_security_group.worker-sg.id]
   # user_data = "${base64encode(data.template_file.user_data.rendered)}"
 }
 
@@ -100,3 +103,34 @@ resource "aws_launch_template" "worker-launch-template" {
 #     sudo -u ec2-user bash -c 'echo "${data.local_file.public_ssh_key.content}" >> ~/.ssh/authorized_keys'
 #     EOF
 # }
+resource "aws_security_group" "worker-sg" {
+  name        = "${var.cluster_name}-worker-sg"
+  description = "Worker nodes security group"
+  vpc_id      = module.vpc.vpc_id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  # Allow connection to cluster api server
+  ingress {
+    from_port = 9001
+    to_port = 9022
+    protocol = "tcp"
+    cidr_blocks  = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = 9002
+    to_port = 9002
+    protocol = "udp"
+    cidr_blocks  = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    security_groups = [aws_security_group.cluster_sg.id]
+  }
+}

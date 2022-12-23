@@ -13,6 +13,7 @@ resource "aws_eks_cluster" "portwork-cluster" {
     aws_iam_role_policy_attachment.cluster_policy,
     aws_iam_role_policy_attachment.service_policy,
   ]
+  version = "1.23"
 }
 
 resource "aws_iam_role" "portwork-cluster-role" {
@@ -62,12 +63,12 @@ resource "aws_security_group" "cluster_sg" {
     protocol = "tcp"
     cidr_blocks  = ["0.0.0.0/0"]
   }
-  ingress {
-    from_port = 9001
-    to_port = 9001
-    protocol = "tcp"
-    cidr_blocks  = ["0.0.0.0/0"]
-  }
+  # ingress {
+  #   from_port = 9001
+  #   to_port = 9001
+  #   protocol = "tcp"
+  #   cidr_blocks  = ["0.0.0.0/0"]
+  # }
   tags = {
     Name = var.cluster_name
   }
