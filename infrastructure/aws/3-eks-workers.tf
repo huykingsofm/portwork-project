@@ -2,9 +2,11 @@ resource "aws_eks_node_group" "portwork-workers" {
   cluster_name    = aws_eks_cluster.portwork-cluster.name
   node_group_name = "portwork-workers"
   node_role_arn   = aws_iam_role.worker_role.arn
-  subnet_ids      = module.vpc.private_subnets
-  disk_size = "50"
-
+  subnet_ids      = module.vpc.public_subnets
+  launch_template {
+    id = aws_launch_template.worker-launch-template.id
+    version = "$Latest"
+  }
   scaling_config {
     desired_size = 3
     max_size     = 3
@@ -14,6 +16,7 @@ resource "aws_eks_node_group" "portwork-workers" {
   update_config {
     max_unavailable = 1
   }
+
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
   # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
@@ -58,9 +61,42 @@ resource "aws_iam_role_policy_attachment" "ecr_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.worker_role.name
 }
+resource "aws_iam_role_policy_attachment" "ssm_policy" {
+  role       = aws_iam_role.worker_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
 
 # resource "aws_iam_role_policy_attachment" "sqs_policy" {
 #   policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
 #   role       = aws_iam_role.worker_role.name
 # }
 
+resource "aws_launch_template" "worker-launch-template" {
+  name = "worker-launch-template"
+
+  block_device_mappings {
+    device_name = "/dev/sda1"
+    ebs {
+      volume_size = 20
+    }
+  }
+  block_device_mappings {
+    device_name = "/dev/sdh"
+    ebs {
+      volume_size = 50
+      delete_on_termination = true
+    }
+  }
+  # user_data = "${base64encode(data.template_file.user_data.rendered)}"
+}
+
+# data "local_file" "public_ssh_key" {
+#   filename = "/home/mc/.ssh/id_rsa.pub"
+# }
+
+# data "template_file" "user_data" {
+#   template = <<-EOF
+#     #!/bin/bash
+#     sudo -u ec2-user bash -c 'echo "${data.local_file.public_ssh_key.content}" >> ~/.ssh/authorized_keys'
+#     EOF
+# }

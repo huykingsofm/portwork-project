@@ -19,3 +19,11 @@ export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=
 
 or aws configure
+
+
+kubectl edit configmap aws-auth -n kube-system
+
+mapUsers: |
+  - userarn: arn:aws:iam::[account_id]:root
+    groups:
+    - system:masters

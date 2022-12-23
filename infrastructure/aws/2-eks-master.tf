@@ -4,6 +4,7 @@ resource "aws_eks_cluster" "portwork-cluster" {
 
   vpc_config {
     subnet_ids = module.vpc.private_subnets
+    security_group_ids = [aws_security_group.cluster_sg.id]
   }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
@@ -67,7 +68,6 @@ resource "aws_security_group" "cluster_sg" {
     protocol = "tcp"
     cidr_blocks  = ["0.0.0.0/0"]
   }
-
   tags = {
     Name = var.cluster_name
   }
