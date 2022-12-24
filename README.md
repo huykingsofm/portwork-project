@@ -15,9 +15,13 @@ Introduction to portworx - Kubernetes storage platform
     git clone https://github.com/huynhminhchu/portwork-project.git
 
 #### Configure the AWS credential:
-For the terraform code to work, we need to authenticate it with AWS. There are different ways to do this but for demonstration we will use the [shared configuration and credentials files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). By default, these files are located at $HOME/.aws/config and $HOME/.aws/credentials.
-Run the following command to set up AWS credential
-    aws configure
+For the terraform code to work, we need to authenticate it with AWS.  
+There are different ways to do this but for demonstration we will use the [shared configuration and credentials files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).  
+By default, these files are located at $HOME/.aws/config and $HOME/.aws/credentials.  
+Run the following command to set up AWS credential:  
+
+      aws configure
+
 Enter your credentials (AWS Access Key ID and AWS Secret Access Key) and region.
 
 #### Provisioning the EKS cluster
@@ -29,52 +33,52 @@ Enter your credentials (AWS Access Key ID and AWS Secret Access Key) and region.
 Terraform will provision a 3-node kubernetes cluster in AWS as the following diagram:
 ![AWS EKS Portwork](/images/aws_portwork.png)
 
-##### What to note:
-First, in 1-vpc.tf we create a VPC in AWS with a CIDR range of 10.1.0.0/16, 3 public subnets and 3 private subnets across 3 AZs (us-west-2a, us-west-2b, us-west-2c).
-Then we initialize an EKS cluster in 2-eks-master.tf and assign the control plane a role with enough permission
+##### *What to note*:
+First, in 1-vpc.tf we create a VPC in AWS with a CIDR range of 10.1.0.0/16, 3 public subnets and 3 private subnets across 3 AZs (us-west-2a, us-west-2b, us-west-2c).  
+Then we initialize an EKS cluster in 2-eks-master.tf and assign the control plane a role with enough permission.  
 After that, in 3-eks-workers.tf we create 3 nodes in the EKS cluster and provide them the required permissions for portworx:
-      {
-        "Version": "2012-10-17",
-        "Statement": [
-          {
-            "Sid": "", 
-            "Effect": "Allow",
-            "Action": [
-              "ec2:AttachVolume",
-              "ec2:ModifyVolume",
-              "ec2:DetachVolume",
-              "ec2:CreateTags",
-              "ec2:CreateVolume",
-              "ec2:DeleteTags",
-              "ec2:DeleteVolume",
-              "ec2:DescribeTags",
-              "ec2:DescribeVolumeAttribute",
-              "ec2:DescribeVolumesModifications",
-              "ec2:DescribeVolumeStatus",
-              "ec2:DescribeVolumes",
-              "ec2:DescribeInstances",
-              "autoscaling:DescribeAutoScalingGroups"
-            ],
-            "Resource": [
-              "*"
-            ]
-          }
-        ]
-      }
-We should also add a policy to allow SSM connection to worker nodes (for debugging):
+
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Sid": "", 
+          "Effect": "Allow",
+          "Action": [
+            "ec2:AttachVolume",
+            "ec2:ModifyVolume",
+            "ec2:DetachVolume",
+            "ec2:CreateTags",
+            "ec2:CreateVolume",
+            "ec2:DeleteTags",
+            "ec2:DeleteVolume",
+            "ec2:DescribeTags",
+            "ec2:DescribeVolumeAttribute",
+            "ec2:DescribeVolumesModifications",
+            "ec2:DescribeVolumeStatus",
+            "ec2:DescribeVolumes",
+            "ec2:DescribeInstances",
+            "autoscaling:DescribeAutoScalingGroups"
+          ],
+          "Resource": [
+            "*"
+          ]
+        }
+      ]
+    }
+We should also add a policy to allow SSM connection to worker nodes (for debugging):  
+
       resource "aws_iam_role_policy_attachment" "ssm_policy" {
         role       = aws_iam_role.worker_role.name
         policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
       }
-Finally don't forget to add a new disk to use in portworx:
-      block_device_mappings {
-        device_name = "/dev/sdh"
-        ebs {
-          volume_size           = 50
-          delete_on_termination = true
-        }
-      }
-#### 
+
+Wait for the EKS cluster ...
+### 2. Deploy portworx on the EKS cluster
+- Navigate to the Portworx [spec generator](https://central.portworx.com/specGen/wizard)
+- Select Portworx Enterprise:  
+  ![AWS EKS Portwork](/images/aws_portwork.png)
+
 
 
 
