@@ -1,9 +1,16 @@
-# portwork-project
+# **Portwork-project**
 Introduction to portworx - Kubernetes storage platform
 
 ## **AWS**
+### Contents
+[Provision EKS cluster using Terraform](https://github.com/huynhminhchu/portwork-project#eks-cluster)
 
-### 1. Create a new kubernetes cluster (3-node) in AWS
+[Deploy portworx operator on EKS cluster](https://github.com/huynhminhchu/portwork-project#deploy-px)
+
+[Create your first PVC](https://github.com/huynhminhchu/portwork-project#use-px)
+
+[Clean up resources](https://github.com/huynhminhchu/portwork-project#cleanup)
+### [1. Create a new kubernetes cluster (3-node) in AWS](#eks-cluster)
 
 #### Prerequisites:
 - an AWS account
@@ -76,7 +83,7 @@ We should also add a policy to allow SSM connection to worker nodes (for debuggi
 Wait for the EKS cluster to be up then configure the kubectl: 
 
       aws eks update-kubeconfig --name portwork-cluster --region us-west-2
-### 2. Deploy portworx on the EKS cluster
+### [2. Deploy portworx on the EKS cluster](#deploy-px)
 - Navigate to the Portworx [spec generator](https://central.portworx.com/specGen/wizard)  
 - Select Portworx Essentials and Continue.  
 - Tick on use the portworx operator, choose portworx v2.12 and specify Kubernete version (1.23.13-eks-fb459a0):  
@@ -110,7 +117,7 @@ Wait for the EKS cluster to be up then configure the kubectl:
 
     ![List all portworx pods](/images/px_cluster_status.PNG)
 
-### 3. Portworx on Kubernetes
+### [3. Portworx on Kubernetes](#use-px)
 - Change working dir to demo-app/:
 
       cd ../demo-app
@@ -198,7 +205,7 @@ Wait for the EKS cluster to be up then configure the kubectl:
       kubectl describe deploy nginx
     ![Portworx demo app](/images/portworx_demo_app.PNG)
 
-### 4. Clean up resources
+### [4. Clean up resources](#cleanup)
 
 - Tear down the EKS cluster:
   
@@ -219,44 +226,6 @@ Wait for the EKS cluster to be up then configure the kubectl:
           groups:
           - system:masters
 
+## **OCI** 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Terraform oracle provider
-- 1.Get tenancy_ocid = ""
-- 2.Get user ocid = "" 
-- 3.1 Generate an api signing key: https://docs.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm#two
-  openssl genrsa -out private_key.pem -aes128 2048
-  chmod go-rwx private_key.pem
-  openssl rsa -pubout -in private_key.pem -out public_key.pem
-
-    When you upload your public key to the identity control plane, you get a key ID in return:
-    The key format is tenantId/userId/fingerprint.
-    Or we can generate again: 
-
-
-# Create eks cluster in aws
-export AWS_ACCESS_KEY_ID=
-export AWS_SECRET_ACCESS_KEY=
-
-or aws configure
-
-
-aws eks update-kubeconfig --name portwork-cluster --region us-west-2
-
-
-
-
-
+[Pending] Out of capacity issue
