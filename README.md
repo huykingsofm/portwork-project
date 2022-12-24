@@ -73,14 +73,141 @@ We should also add a policy to allow SSM connection to worker nodes (for debuggi
         policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
       }
 
-Wait for the EKS cluster ...
+Wait for the EKS cluster to be up then configure the kubectl: 
+
+      aws eks update-kubeconfig --name portwork-cluster --region us-west-2
 ### 2. Deploy portworx on the EKS cluster
-- Navigate to the Portworx [spec generator](https://central.portworx.com/specGen/wizard)
-- Select Portworx Enterprise:  
-  ![AWS EKS Portwork](/images/aws_portwork.png)
+- Navigate to the Portworx [spec generator](https://central.portworx.com/specGen/wizard)  
+- Select Portworx Essentials and Continue.  
+- Tick on use the portworx operator, choose portworx v2.12 and specify Kubernete version (1.23.13-eks-fb459a0):  
+![Basic setting](/images/basic_setting.PNG)
+- Select AWS Cloud Platform and leave everything as default (or we can specify existing disks):
+![AWS EKS Portwork](/images/2_3.PNG)
+- Leave network setting as default:
+![Network setting](/images/network_setting.PNG)
+- Under the Customize tab, select Amazon EKS option and Finish:
+![Network setting](/images/network_setting.PNG)
 
+- Install the Portworx Operator Deployment Spec and wait for it to be operational:
+      
+      kubectl apply -f 'https://install.portworx.com/2.12?comp=pxoperator&kbver=1.23.13-eks-fb459a0&ns=portworx'
 
+  <!-- tsk -->
 
+      kubectl apply -f 'https://install.portworx.com/2.12?operator=true&mc=false&kbver=1.23.13-eks-fb459a0&ns=portworx&oem=esse&user=691b8f86-9efb-42d1-8927-7036c46cae7d&b=true&s=%2Fdev%2Fnvme2n1&j=auto&kd=type%3Dgp2%2Csize%3D150&c=px-cluster-aa66e19e-b848-44a6-9ea3-30b12c14383b&eks=true&stork=true&csi=true&mon=true&tel=false&st=k8s&promop=true'
+
+- Verify if all pods are running:
+
+      kubectl get pods -A 
+
+    ![List all portworx pods](/images/list_px_pods.PNG)
+
+- Verify Portworx cluster status:
+
+      PX_POD=$(kubectl get pods -l name=portworx -n portworx -o jsonpath='{.items[0].metadata.name}')
+  <!-- tsk -->
+      kubectl exec -it $PX_POD -n portworx -- /opt/pwx/bin/pxctl status
+
+    ![List all portworx pods](/images/px_cluster_status.PNG)
+
+### 3. Portworx on Kubernetes
+- Change working dir to demo-app/:
+
+      cd ../demo-app
+
+- Create a StorageClass that references Portworx as the provisioner:
+
+      #demo-sc.yaml
+      kind: StorageClass
+      apiVersion: storage.k8s.io/v1
+      metadata:
+        name: portworx-demo-sc
+      provisioner: kubernetes.io/portworx-volume
+      parameters:
+        repl: "1"
+
+  <!-- tsk -->
+
+      kubectl apply -f demo-sc.yaml
+
+- Verify the StorageClass that we've just created: 
+  
+      kubectl describe sc portworx-demo-sc
+
+    ![Portworx demo storage class describe](/images/portworx_demo_sc.PNG)
+
+- Create a PersistentVolumeClaim referencing the portworx-demo-sc StorageClass:
+
+      #demo-pvc.yaml
+      kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: portworx-demo-pvc
+        annotations:
+          volume.beta.kubernetes.io/storage-class: portworx-demo-sc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+
+- Verify the PVC: 
+
+      kubectl get pvc
+    ![Portworx demo PVC](/images/portworx_demo_pvc.PNG)
+
+- Create a new deployment:
+
+      # demo-app.yaml
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nginx
+        labels:
+           app: nginx
+      spec:
+        selector:
+          matchLabels:
+            app: nginx
+        replicas: 1
+        template:
+          metadata:
+            labels:
+              app: nginx
+          spec:
+            containers:
+            - name: nginx
+              image: k8s.gcr.io/nginx-slim:0.8
+              ports:
+              - containerPort: 80
+              volumeMounts:
+              - mountPath: /var/www/html
+                name: nginx-data
+            volumes:
+            - name: nginx-data
+              persistentVolumeClaim:
+                claimName: portworx-demo-pvc
+  
+    <!-- tsk -->
+
+      kubectl apply -f demo-app.yaml
+
+- Verify the deployment:
+
+      kubectl describe deploy nginx
+
+      ![Portworx demo app](/images/portworx_demo_app.PNG)
+
+### 4. Clean up resources
+
+- Tear down the EKS cluster:
+  
+    terraform destroy --auto-approve
+
+- Unlink the portworx cluster:
+
+    ![Portworx clean up](/images/portworx_cleanup.PNG)
 
 
 
@@ -128,9 +255,5 @@ mapUsers: |
     - system:masters
 
 
-kubectl apply -f 'https://install.portworx.com/2.12?comp=pxoperator&kbver=1.23.13-eks-fb459a0&ns=portworx'
 
-kubectl apply -f 'https://install.portworx.com/2.12?operator=true&mc=false&kbver=1.23.13-eks-fb459a0&ns=portworx&oem=esse&user=691b8f86-9efb-42d1-8927-7036c46cae7d&b=true&s=%2Fdev%2Fnvme2n1&j=auto&kd=type%3Dgp2%2Csize%3D150&c=px-cluster-aa66e19e-b848-44a6-9ea3-30b12c14383b&eks=true&stork=true&csi=true&mon=true&tel=false&st=k8s&promop=true'
 
-PX_POD=$(kubectl get pods -l name=portworx -n portworx -o jsonpath='{.items[0].metadata.name}')
-kubectl exec -it $PX_POD -n portworx -- /opt/pwx/bin/pxctl status
