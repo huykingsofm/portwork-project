@@ -3,7 +3,7 @@ resource "aws_eks_cluster" "portwork-cluster" {
   role_arn = aws_iam_role.portwork-cluster-role.arn
 
   vpc_config {
-    subnet_ids = module.vpc.private_subnets
+    subnet_ids         = module.vpc.private_subnets
     security_group_ids = [aws_security_group.cluster_sg.id]
   }
 
@@ -14,6 +14,9 @@ resource "aws_eks_cluster" "portwork-cluster" {
     aws_iam_role_policy_attachment.service_policy,
   ]
   version = "1.23"
+  kubernetes_network_config {
+    service_ipv4_cidr = "192.168.0.0/16"
+  }
 }
 
 resource "aws_iam_role" "portwork-cluster-role" {
@@ -58,17 +61,29 @@ resource "aws_security_group" "cluster_sg" {
   }
   # Allow connection to cluster api server
   ingress {
-    from_port = 443
-    to_port = 443
-    protocol = "tcp"
-    cidr_blocks  = ["0.0.0.0/0"]
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
-  # ingress {
-  #   from_port = 9001
-  #   to_port = 9001
-  #   protocol = "tcp"
-  #   cidr_blocks  = ["0.0.0.0/0"]
-  # }
+  ingress {
+    from_port   = 9001
+    to_port     = 9022
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 9002
+    to_port     = 9002
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port    = 0
+    to_port      = 0
+    protocol     = "-1"
+    cidr_blocks = ["10.1.0.0/16"]
+  }
   tags = {
     Name = var.cluster_name
   }

@@ -4,7 +4,7 @@ resource "aws_eks_node_group" "portwork-workers" {
   node_role_arn   = aws_iam_role.worker_role.arn
   subnet_ids      = module.vpc.public_subnets
   launch_template {
-    id = aws_launch_template.worker-launch-template.id
+    id      = aws_launch_template.worker-launch-template.id
     version = "$Latest"
   }
   scaling_config {
@@ -85,11 +85,11 @@ resource "aws_launch_template" "worker-launch-template" {
   block_device_mappings {
     device_name = "/dev/sdh"
     ebs {
-      volume_size = 50
+      volume_size           = 50
       delete_on_termination = true
     }
   }
-  vpc_security_group_ids   = [aws_security_group.worker-sg.id]
+  vpc_security_group_ids = [aws_security_group.worker-sg.id]
   # user_data = "${base64encode(data.template_file.user_data.rendered)}"
 }
 
@@ -116,21 +116,21 @@ resource "aws_security_group" "worker-sg" {
   }
   # Allow connection to cluster api server
   ingress {
-    from_port = 9001
-    to_port = 9022
-    protocol = "tcp"
-    cidr_blocks  = ["0.0.0.0/0"]
+    from_port   = 9001
+    to_port     = 9022
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port = 9002
-    to_port = 9002
-    protocol = "udp"
-    cidr_blocks  = ["0.0.0.0/0"]
+    from_port   = 9002
+    to_port     = 9002
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    security_groups = [aws_security_group.cluster_sg.id]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["10.1.0.0/16"]
   }
 }

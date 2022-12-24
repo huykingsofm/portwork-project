@@ -5,7 +5,7 @@ module "vpc" {
   name = "education-vpc"
 
   cidr = "10.1.0.0/16"
-  azs             = ["us-west-2a", "us-west-2b", "us-west-2c"]
+  azs  = ["us-west-2a", "us-west-2b", "us-west-2c"]
 
   private_subnets = ["10.1.1.0/24", "10.1.2.0/24", "10.1.3.0/24"]
   public_subnets  = ["10.1.4.0/24", "10.1.5.0/24", "10.1.6.0/24"]
@@ -16,12 +16,12 @@ module "vpc" {
 
   public_subnet_tags = {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-    "kubernetes.io/role/elb"                      = 1
+    "kubernetes.io/role/elb"                    = 1
   }
 
   private_subnet_tags = {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
-    "kubernetes.io/role/internal-elb"             = 1
+    "kubernetes.io/role/internal-elb"           = 1
   }
 }
 
