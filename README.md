@@ -75,7 +75,7 @@ We should also add a policy to allow SSM connection to worker nodes (for debuggi
 Wait for the EKS cluster to be up then configure the kubectl: 
 
       aws eks update-kubeconfig --name portwork-cluster --region us-west-2
-### [2. Deploy portworx on the EKS cluster](#deploy-px)
+### 2. Deploy portworx on the EKS cluster
 - Navigate to the Portworx [spec generator](https://central.portworx.com/specGen/wizard)  
 - Select Portworx Essentials and Continue.  
 - Tick on use the portworx operator, choose portworx v2.12 and specify Kubernete version (1.23.13-eks-fb459a0):  
@@ -109,7 +109,7 @@ Wait for the EKS cluster to be up then configure the kubectl:
 
     ![List all portworx pods](/images/px_cluster_status.PNG)
 
-### [3. Portworx on Kubernetes](#use-px)
+### 3. Portworx on Kubernetes
 - Change working dir to demo-app/:
 
       cd ../demo-app
@@ -197,7 +197,7 @@ Wait for the EKS cluster to be up then configure the kubectl:
       kubectl describe deploy nginx
     ![Portworx demo app](/images/portworx_demo_app.PNG)
 
-### [4. Clean up resources](#cleanup)
+### 4. Clean up resources
 
 - Tear down the EKS cluster:
   
