@@ -2,16 +2,8 @@
 Introduction to portworx - Kubernetes storage platform
 
 ## **AWS**
-### Contents
-[Provision EKS cluster using Terraform](https://github.com/huynhminhchu/portwork-project#eks-cluster)
 
-[Deploy portworx operator on EKS cluster](https://github.com/huynhminhchu/portwork-project#deploy-px)
-
-[Create your first PVC](https://github.com/huynhminhchu/portwork-project#use-px)
-
-[Clean up resources](https://github.com/huynhminhchu/portwork-project#cleanup)
-### [1. Create a new kubernetes cluster (3-node) in AWS](#eks-cluster)
-
+### 1. Create a new kubernetes cluster in AWS
 #### Prerequisites:
 - an AWS account
 - kubectl (v1.24.0 or newer)

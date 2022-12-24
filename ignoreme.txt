@@ -13,3 +13,12 @@
 
 export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=
+
+### Contents
+[Provision EKS cluster using Terraform](#1.create-a-new-kubernetes-cluster-in-aws)
+
+[Deploy portworx operator on EKS cluster](https://github.com/huynhminhchu/portwork-project#deploy-px)
+
+[Create your first PVC](https://github.com/huynhminhchu/portwork-project#use-px)
+
+[Clean up resources](https://github.com/huynhminhchu/portwork-project#cleanup)
