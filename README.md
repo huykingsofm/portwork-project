@@ -82,11 +82,11 @@ Wait for the EKS cluster to be up then configure the kubectl:
 - Tick on use the portworx operator, choose portworx v2.12 and specify Kubernete version (1.23.13-eks-fb459a0):  
 ![Basic setting](/images/basic_setting.PNG)
 - Select AWS Cloud Platform and leave everything as default (or we can specify existing disks):
-![AWS EKS Portwork](/images/2_3.PNG)
+![AWS EKS Portwork](/images/storage_setting.PNG)
 - Leave network setting as default:
 ![Network setting](/images/network_setting.PNG)
 - Under the Customize tab, select Amazon EKS option and Finish:
-![Network setting](/images/network_setting.PNG)
+![Network setting](/images/customize_setting.PNG)
 
 - Install the Portworx Operator Deployment Spec and wait for it to be operational:
       
@@ -196,20 +196,28 @@ Wait for the EKS cluster to be up then configure the kubectl:
 - Verify the deployment:
 
       kubectl describe deploy nginx
-
-      ![Portworx demo app](/images/portworx_demo_app.PNG)
+    ![Portworx demo app](/images/portworx_demo_app.PNG)
 
 ### 4. Clean up resources
 
 - Tear down the EKS cluster:
   
-    terraform destroy --auto-approve
+      terraform destroy --auto-approve
 
 - Unlink the portworx cluster:
 
     ![Portworx clean up](/images/portworx_cleanup.PNG)
 
 
+** OPTIONAL **: 
+- Edit configmap aws-auth to make EKS cluster infos visible in the UI:  
+    
+      kubectl edit configmap aws-auth -n kube-system
+    <!-- tsk -->
+      mapUsers: |
+        - userarn: arn:aws:iam::[account_id]:root
+          groups:
+          - system:masters
 
 
 
@@ -247,12 +255,7 @@ or aws configure
 
 
 aws eks update-kubeconfig --name portwork-cluster --region us-west-2
-kubectl edit configmap aws-auth -n kube-system
 
-mapUsers: |
-  - userarn: arn:aws:iam::[account_id]:root
-    groups:
-    - system:masters
 
 
 
