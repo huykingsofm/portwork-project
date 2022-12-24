@@ -30,9 +30,9 @@ Terraform will provision a 3-node kubernetes cluster in AWS as the following dia
 ![AWS EKS Portwork](/images/aws_portwork.png)
 
 ##### What to note:
-      - First we create a VPC in AWS with a CIDR range of 10.1.0.0/16, 3 public subnets and 3 private subnets across 3 AZs (us-west-2a, us-west-2b, us-west-2c).
-      - Then we initialize an EKS cluster and assign the control plane a role with enough permission
-      - Finally, we create 3 nodes in the EKS cluster and provide them the required permissions for portworx.
+First, in 1-vpc.tf we create a VPC in AWS with a CIDR range of 10.1.0.0/16, 3 public subnets and 3 private subnets across 3 AZs (us-west-2a, us-west-2b, us-west-2c).
+Then we initialize an EKS cluster in 2-eks-master.tf and assign the control plane a role with enough permission
+After that, in 3-eks-workers.tf we create 3 nodes in the EKS cluster and provide them the required permissions for portworx:
       {
         "Version": "2012-10-17",
         "Statement": [
@@ -60,6 +60,19 @@ Terraform will provision a 3-node kubernetes cluster in AWS as the following dia
             ]
           }
         ]
+      }
+We should also add a policy to allow SSM connection to worker nodes (for debugging):
+      resource "aws_iam_role_policy_attachment" "ssm_policy" {
+        role       = aws_iam_role.worker_role.name
+        policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+      }
+Finally don't forget to add a new disk to use in portworx:
+      block_device_mappings {
+        device_name = "/dev/sdh"
+        ebs {
+          volume_size           = 50
+          delete_on_termination = true
+        }
       }
 #### 
 
