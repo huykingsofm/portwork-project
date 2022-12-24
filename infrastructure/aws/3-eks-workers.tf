@@ -50,7 +50,7 @@ POLICY
 }
 
 resource "aws_iam_role_policy_attachment" "worker_node_policy" {
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  policy_arn = aws_iam_policy.portworx-policy.arn
   role       = aws_iam_role.worker_role.name
 }
 
@@ -68,10 +68,41 @@ resource "aws_iam_role_policy_attachment" "ssm_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
-# resource "aws_iam_role_policy_attachment" "sqs_policy" {
-#   policy_arn = "arn:aws:iam::aws:policy/AmazonSQSFullAccess"
-#   role       = aws_iam_role.worker_role.name
-# }
+resource "aws_iam_policy" "portworx-policy" {
+  name        = "portworx-policy"
+  description = "Portworx-policy"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "", 
+            "Effect": "Allow",
+            "Action": [
+                "ec2:AttachVolume",
+                "ec2:ModifyVolume",
+                "ec2:DetachVolume",
+                "ec2:CreateTags",
+                "ec2:CreateVolume",
+                "ec2:DeleteTags",
+                "ec2:DeleteVolume",
+                "ec2:DescribeTags",
+                "ec2:DescribeVolumeAttribute",
+                "ec2:DescribeVolumesModifications",
+                "ec2:DescribeVolumeStatus",
+                "ec2:DescribeVolumes",
+                "ec2:DescribeInstances",
+                "autoscaling:DescribeAutoScalingGroups"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
+EOF
+}
 
 resource "aws_launch_template" "worker-launch-template" {
   name = "worker-launch-template"
@@ -90,19 +121,9 @@ resource "aws_launch_template" "worker-launch-template" {
     }
   }
   vpc_security_group_ids = [aws_security_group.worker-sg.id]
-  # user_data = "${base64encode(data.template_file.user_data.rendered)}"
 }
 
-# data "local_file" "public_ssh_key" {
-#   filename = "/home/mc/.ssh/id_rsa.pub"
-# }
 
-# data "template_file" "user_data" {
-#   template = <<-EOF
-#     #!/bin/bash
-#     sudo -u ec2-user bash -c 'echo "${data.local_file.public_ssh_key.content}" >> ~/.ssh/authorized_keys'
-#     EOF
-# }
 resource "aws_security_group" "worker-sg" {
   name        = "${var.cluster_name}-worker-sg"
   description = "Worker nodes security group"

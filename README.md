@@ -30,6 +30,9 @@ mapUsers: |
     - system:masters
 
 
-kubectl delete -f 'https://install.portworx.com/2.12?comp=pxoperator&kbver=1.23.13&ns=portworx'
+kubectl apply -f 'https://install.portworx.com/2.12?comp=pxoperator&kbver=1.23.13-eks-fb459a0&ns=portworx'
 
-kubectl delete -f 'https://install.portworx.com/2.12?operator=true&mc=false&kbver=1.23.13&ns=portworx&oem=esse&user=691b8f86-9efb-42d1-8927-7036c46cae7d&b=true&kd=type%3Dgp2%2Csize%3D150&s=%22type%3Dgp2%2Csize%3D150%22&j=auto&c=px-cluster-b5510509-c0e6-4654-9e1b-d08ad30f46e8&eks=true&stork=true&csi=true&mon=true&tel=false&st=k8s&promop=true'
+kubectl apply -f 'https://install.portworx.com/2.12?operator=true&mc=false&kbver=1.23.13-eks-fb459a0&ns=portworx&oem=esse&user=691b8f86-9efb-42d1-8927-7036c46cae7d&b=true&s=%2Fdev%2Fnvme2n1&j=auto&c=px-cluster-f51556dd-183a-4880-b19d-9542027f9925&stork=true&csi=true&mon=true&tel=false&st=k8s&promop=true'
+
+PX_POD=$(kubectl get pods -l name=portworx -n portworx -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -it $PX_POD -n portworx -- /opt/pwx/bin/pxctl status

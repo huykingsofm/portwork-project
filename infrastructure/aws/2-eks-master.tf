@@ -66,18 +66,18 @@ resource "aws_security_group" "cluster_sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  ingress {
-    from_port   = 9001
-    to_port     = 9022
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    from_port   = 9002
-    to_port     = 9002
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  # ingress {
+  #   from_port   = 9001
+  #   to_port     = 9022
+  #   protocol    = "tcp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
+  # ingress {
+  #   from_port   = 9002
+  #   to_port     = 9002
+  #   protocol    = "udp"
+  #   cidr_blocks = ["0.0.0.0/0"]
+  # }
   ingress {
     from_port    = 0
     to_port      = 0
