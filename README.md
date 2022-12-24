@@ -1,5 +1,35 @@
 # portwork-project
-A portwork project
+Introduction to portworx - Kubernetes storage platform
+
+## **AWS**
+
+### 1. Create a new kubernetes cluster (3-node) in AWS
+
+#### Prerequisites
+- an AWS account
+- kubectl (v1.24.0 or newer)
+- aws-cli (tested on v1.27.35): a cli tool to interact with AWS services.
+- terraform (test on v1.2.7): an Infras-as-code tool that let us build, change cloud and on-prem resources
+
+#### Clone this repository:
+  git clone https://github.com/huynhminhchu/portwork-project.git
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Terraform oracle provider
 - 1.Get tenancy_ocid = ""
@@ -32,7 +62,7 @@ mapUsers: |
 
 kubectl apply -f 'https://install.portworx.com/2.12?comp=pxoperator&kbver=1.23.13-eks-fb459a0&ns=portworx'
 
-kubectl apply -f 'https://install.portworx.com/2.12?operator=true&mc=false&kbver=1.23.13-eks-fb459a0&ns=portworx&oem=esse&user=691b8f86-9efb-42d1-8927-7036c46cae7d&b=true&s=%2Fdev%2Fnvme2n1&j=auto&c=px-cluster-f51556dd-183a-4880-b19d-9542027f9925&stork=true&csi=true&mon=true&tel=false&st=k8s&promop=true'
+kubectl apply -f 'https://install.portworx.com/2.12?operator=true&mc=false&kbver=1.23.13-eks-fb459a0&ns=portworx&oem=esse&user=691b8f86-9efb-42d1-8927-7036c46cae7d&b=true&s=%2Fdev%2Fnvme2n1&j=auto&kd=type%3Dgp2%2Csize%3D150&c=px-cluster-aa66e19e-b848-44a6-9ea3-30b12c14383b&eks=true&stork=true&csi=true&mon=true&tel=false&st=k8s&promop=true'
 
 PX_POD=$(kubectl get pods -l name=portworx -n portworx -o jsonpath='{.items[0].metadata.name}')
 kubectl exec -it $PX_POD -n portworx -- /opt/pwx/bin/pxctl status
