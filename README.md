@@ -21,10 +21,47 @@ Run the following command to set up AWS credential
 Enter your credentials (AWS Access Key ID and AWS Secret Access Key) and region.
 
 #### Provisioning the EKS cluster
-  cd infrastructure
-  terraform init
-  terraform apply --auto-approve
+    cd infrastructure
+    # Init: terraform will download defined modules
+    terraform init
+    # Create infras
+    terraform apply --auto-approve
+Terraform will provision a 3-node kubernetes cluster in AWS as the following diagram:
+![AWS EKS Portwork](/images/aws_portwork.png)
 
+##### What to note:
+      - First we create a VPC in AWS with a CIDR range of 10.1.0.0/16, 3 public subnets and 3 private subnets across 3 AZs (us-west-2a, us-west-2b, us-west-2c).
+      - Then we initialize an EKS cluster and assign the control plane a role with enough permission
+      - Finally, we create 3 nodes in the EKS cluster and provide them the required permissions for portworx.
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "", 
+            "Effect": "Allow",
+            "Action": [
+              "ec2:AttachVolume",
+              "ec2:ModifyVolume",
+              "ec2:DetachVolume",
+              "ec2:CreateTags",
+              "ec2:CreateVolume",
+              "ec2:DeleteTags",
+              "ec2:DeleteVolume",
+              "ec2:DescribeTags",
+              "ec2:DescribeVolumeAttribute",
+              "ec2:DescribeVolumesModifications",
+              "ec2:DescribeVolumeStatus",
+              "ec2:DescribeVolumes",
+              "ec2:DescribeInstances",
+              "autoscaling:DescribeAutoScalingGroups"
+            ],
+            "Resource": [
+              "*"
+            ]
+          }
+        ]
+      }
+#### 
 
 
 
