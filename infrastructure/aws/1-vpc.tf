@@ -28,7 +28,3 @@ module "vpc" {
 data "aws_availability_zones" "azs" {
   all_availability_zones = true
 }
-
-
-#Value (us-west-2-las-1a) for parameter availabilityZone is invalid.
-#Subnets can currently only be created in the following availability zones: us-west-2a, us-west-2b, us-west-2c, us-west-2d.

@@ -5,14 +5,28 @@ Introduction to portworx - Kubernetes storage platform
 
 ### 1. Create a new kubernetes cluster (3-node) in AWS
 
-#### Prerequisites
+#### Prerequisites:
 - an AWS account
 - kubectl (v1.24.0 or newer)
 - aws-cli (tested on v1.27.35): a cli tool to interact with AWS services.
 - terraform (test on v1.2.7): an Infras-as-code tool that let us build, change cloud and on-prem resources
 
 #### Clone this repository:
-  git clone https://github.com/huynhminhchu/portwork-project.git
+    git clone https://github.com/huynhminhchu/portwork-project.git
+
+#### Configure the AWS credential:
+For the terraform code to work, we need to authenticate it with AWS. There are different ways to do this but for demonstration we will use the [shared configuration and credentials files](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html). By default, these files are located at $HOME/.aws/config and $HOME/.aws/credentials.
+Run the following command to set up AWS credential
+    aws configure
+Enter your credentials (AWS Access Key ID and AWS Secret Access Key) and region.
+
+#### Provisioning the EKS cluster
+  cd infrastructure
+  terraform init
+  terraform apply --auto-approve
+
+
+
 
 
 
