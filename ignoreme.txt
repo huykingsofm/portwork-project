@@ -22,3 +22,13 @@ export AWS_SECRET_ACCESS_KEY=
 [Create your first PVC](https://github.com/huynhminhchu/portwork-project#use-px)
 
 [Clean up resources](https://github.com/huynhminhchu/portwork-project#cleanup)
+
+** OPTIONAL **: 
+- Edit configmap aws-auth to make EKS cluster infos visible in the UI:  
+    
+      kubectl edit configmap aws-auth -n kube-system
+    <!-- tsk -->
+      mapUsers: |
+        - userarn: arn:aws:iam::[account_id]:root
+          groups:
+          - system:masters

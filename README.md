@@ -207,17 +207,6 @@ Wait for the EKS cluster to be up then configure the kubectl:
 
     ![Portworx clean up](/images/portworx_cleanup.PNG)
 
-
-** OPTIONAL **: 
-- Edit configmap aws-auth to make EKS cluster infos visible in the UI:  
-    
-      kubectl edit configmap aws-auth -n kube-system
-    <!-- tsk -->
-      mapUsers: |
-        - userarn: arn:aws:iam::[account_id]:root
-          groups:
-          - system:masters
-
 ## **OCI** 
 
 [Pending] Out of capacity issue
